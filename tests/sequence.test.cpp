@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <ferrugo/seq/seq.hpp>
+#include <ferrugo/core/std_ostream.hpp>
 
 #include "matchers.hpp"
 
@@ -112,4 +113,12 @@ TEST_CASE("sequence - transform_join", "[sequence]")
     REQUIRE_THAT(
         seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
         matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
+}
+
+TEST_CASE("sequence - enumerate", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::range(10, 15) |= seq::enumerate(0),
+        matchers::elements_are(
+            std::tuple{ 0, 10 }, std::tuple{ 1, 11 }, std::tuple{ 2, 12 }, std::tuple{ 3, 13 }, std::tuple{ 4, 142 }));
 }
