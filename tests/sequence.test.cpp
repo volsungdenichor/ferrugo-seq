@@ -27,10 +27,9 @@ TEST_CASE("range - lower > upper", "[sequence]")
 
 TEST_CASE("sequence - transform", "[sequence]")
 {
-    const auto f = [](int x) -> core::optional<std::string> { return std::to_string(x); };
     REQUIRE_THAT(
-        seq::range(0, 10) |= seq::transform(f),
-        matchers::elements_are("0"s, "1"s, "2"s, "3"s, "4"s, "5"s, "6"s, "7"s, "8"s, "9"s));
+        seq::range(0, 10) |= seq::transform([](int x) { return std::to_string(x * 10); }),
+        matchers::elements_are("0"s, "10"s, "20"s, "30"s, "40"s, "50"s, "60"s, "70"s, "80"s, "90"s));
 }
 
 TEST_CASE("sequence - transform_maybe", "[sequence]")
@@ -44,4 +43,34 @@ TEST_CASE("sequence - transform_maybe", "[sequence]")
         return {};
     };
     REQUIRE_THAT(seq::range(0, 10) |= seq::transform_maybe(f), matchers::elements_are("0"s, "2"s, "4"s, "6"s, "8"s));
+}
+
+TEST_CASE("sequence - filter", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::filter([](int x) { return x % 3 == 0; }), matchers::elements_are(0, 3, 6, 9));
+}
+
+TEST_CASE("sequence - take", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::take(5), matchers::elements_are(0, 1, 2, 3, 4));
+}
+
+TEST_CASE("sequence - drop", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::drop(5), matchers::elements_are(5, 6, 7, 8, 9));
+}
+
+TEST_CASE("sequence - step", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::step(3), matchers::elements_are(0, 3, 6, 9));
+}
+
+TEST_CASE("sequence - drop_while", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::drop_while([](int x) { return x < 5; }), matchers::elements_are(5, 6, 7, 8, 9));
+}
+
+TEST_CASE("sequence - take_while", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(0, 10) |= seq::take_while([](int x) { return x < 5; }), matchers::elements_are(0, 1, 2, 3, 4));
 }

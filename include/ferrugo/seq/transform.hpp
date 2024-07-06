@@ -35,7 +35,7 @@ struct transform_fn
     {
         Func m_func;
 
-        template <class T, class Out = core::optional_underlying_type_t<std::invoke_result_t<Func, T>>>
+        template <class T, class Out = std::invoke_result_t<Func, T>>
         auto operator()(const sequence<T>& s) const -> sequence<Out>
         {
             return sequence<Out>{ next_function<Func, T, Out>{ m_func, s.get_next() } };
