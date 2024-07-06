@@ -74,3 +74,42 @@ TEST_CASE("sequence - take_while", "[sequence]")
 {
     REQUIRE_THAT(seq::range(0, 10) |= seq::take_while([](int x) { return x < 5; }), matchers::elements_are(0, 1, 2, 3, 4));
 }
+
+TEST_CASE("sequence - zip", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::zip(seq::range(10, 15), seq::range(100, 110)),
+        matchers::elements_are(
+            std::tuple{ 10, 100 },
+            std::tuple{ 11, 101 },
+            std::tuple{ 12, 102 },
+            std::tuple{ 13, 103 },
+            std::tuple{ 14, 104 }));
+}
+
+TEST_CASE("sequence - zip_transform", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::zip_transform(std::plus<>{}, seq::range(10, 15), seq::range(100, 110)),
+        matchers::elements_are(110, 112, 114, 116, 118));
+}
+
+TEST_CASE("sequence - chain", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::chain(seq::range(0, 5), seq::range(100, 105)), matchers::elements_are(0, 1, 2, 3, 4, 100, 101, 102, 103, 104));
+}
+
+TEST_CASE("sequence - join", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::range(5) |= seq::transform([](int x) { return seq::range(x); }) |= seq::join(),
+        matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
+}
+
+TEST_CASE("sequence - transform_join", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
+        matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
+}
