@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ferrugo/core/predicates.hpp>
 #include <ferrugo/seq/sequence.hpp>
 #include <ferrugo/seq/slice.hpp>
 
@@ -37,7 +36,7 @@ struct find_if_fn
     template <class Pred>
     auto operator()(Pred&& pred) const
     {
-        return seq::drop_while(core::negate(std::forward<Pred>(pred))) |= maybe_front;
+        return seq::drop_while(std::not_fn(std::forward<Pred>(pred))) |= maybe_front;
     }
 };
 
