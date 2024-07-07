@@ -12,7 +12,7 @@ namespace detail
 {
 
 template <class In>
-struct drop
+struct drop_impl
 {
     mutable std::ptrdiff_t m_count;
     next_function_t<In> m_next;
@@ -28,7 +28,7 @@ struct drop
 };
 
 template <class In>
-struct take
+struct take_impl
 {
     mutable std::ptrdiff_t m_count;
     next_function_t<In> m_next;
@@ -44,7 +44,7 @@ struct take
 };
 
 template <class In>
-struct step
+struct step_impl
 {
     mutable std::ptrdiff_t m_count;
     next_function_t<In> m_next;
@@ -90,8 +90,8 @@ struct slice_fn
 
 }  // namespace detail
 
-static constexpr inline auto drop = detail::slice_fn<detail::drop>{};
-static constexpr inline auto take = detail::slice_fn<detail::take>{};
-static constexpr inline auto step = detail::slice_fn<detail::step>{};
+static constexpr inline auto drop = detail::slice_fn<detail::drop_impl>{};
+static constexpr inline auto take = detail::slice_fn<detail::take_impl>{};
+static constexpr inline auto step = detail::slice_fn<detail::step_impl>{};
 }  // namespace seq
 }  // namespace ferrugo

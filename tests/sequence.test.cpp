@@ -173,3 +173,20 @@ TEST_CASE("sequence - owning", "[sequence]")
 {
     REQUIRE_THAT(seq::owning(std::vector<int>{ 2, 4, 9, 99, -1 }), matchers::elements_are(2, 4, 9, 99, -1));
 }
+
+TEST_CASE("sequence - maybe_front", "[sequence]")
+{
+    REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));
+    REQUIRE_THAT(*(seq::repeat(3) |= seq::maybe_front), matchers::equal_to(3));
+}
+
+TEST_CASE("sequence - nth", "[sequence]")
+{
+    REQUIRE_THAT(*(seq::range(10) |= seq::nth(3)), matchers::equal_to(3));
+}
+
+TEST_CASE("sequence - find_if", "[sequence]")
+{
+    REQUIRE_THAT(bool(seq::range(10) |= seq::find_if([](int x) { return x > 100; })), matchers::equal_to(false));
+    REQUIRE_THAT(*(seq::range(10) |= seq::find_if([](int x) { return x > 5; })), matchers::equal_to(6));
+}

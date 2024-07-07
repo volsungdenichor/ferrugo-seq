@@ -12,7 +12,7 @@ namespace detail
 {
 
 template <class Pred, class In>
-struct drop_while
+struct drop_while_impl
 {
     Pred m_pred;
     next_function_t<In> m_next;
@@ -41,7 +41,7 @@ struct drop_while
 };
 
 template <class Pred, class In>
-struct take_while
+struct take_while_impl
 {
     Pred m_pred;
     next_function_t<In> m_next;
@@ -80,7 +80,7 @@ struct conditional_slice_fn
 };
 
 }  // namespace detail
-static constexpr inline auto drop_while = detail::conditional_slice_fn<detail::drop_while>{};
-static constexpr inline auto take_while = detail::conditional_slice_fn<detail::take_while>{};
+static constexpr inline auto drop_while = detail::conditional_slice_fn<detail::drop_while_impl>{};
+static constexpr inline auto take_while = detail::conditional_slice_fn<detail::take_while_impl>{};
 }  // namespace seq
 }  // namespace ferrugo

@@ -22,6 +22,26 @@ struct empty_fn
     }
 };
 
+struct repeat_fn
+{
+    template <class T>
+    struct next_function
+    {
+        T m_value;
+
+        auto operator()() const -> core::optional<const T&>
+        {
+            return m_value;
+        }
+    };
+
+    template <class T>
+    auto operator()(T value) const -> sequence<const T&>
+    {
+        return sequence<const T&>{ next_function<T>{ std::move(value) } };
+    }
+};
+
 struct init_fn
 {
     template <class Func, class Out = std::invoke_result_t<Func, std::ptrdiff_t>>
@@ -77,6 +97,8 @@ struct unfold_fn
 
 template <class T>
 static constexpr inline auto empty = detail::empty_fn<T>{};
+
+static constexpr inline auto repeat = detail::repeat_fn{};
 static constexpr inline auto init = detail::init_fn{};
 static constexpr inline auto init_infinite = detail::init_infinite_fn{};
 static constexpr inline auto unfold = detail::unfold_fn{};
