@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_all.hpp>
-#include <ferrugo/seq/seq.hpp>
 #include <ferrugo/core/std_ostream.hpp>
+#include <ferrugo/seq/seq.hpp>
 
 #include "matchers.hpp"
 
@@ -12,7 +12,7 @@ TEST_CASE("sequence - constructor", "[sequence]")
 {
     const auto fn = []() mutable -> core::optional<int> { return {}; };
     seq::sequence<int> s{ fn };
-    REQUIRE_THAT(s, Catch::Matchers::IsEmpty());
+    REQUIRE_THAT(s, matchers::is_empty());
 }
 
 TEST_CASE("range", "[sequence]")
@@ -24,6 +24,11 @@ TEST_CASE("range", "[sequence]")
 TEST_CASE("range - lower > upper", "[sequence]")
 {
     REQUIRE_THAT(seq::range(10, 0), Catch::Matchers::IsEmpty());
+}
+
+TEST_CASE("range - linspace", "[sequence]")
+{
+    REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F, 6.F));
 }
 
 TEST_CASE("sequence - transform", "[sequence]")
@@ -120,5 +125,51 @@ TEST_CASE("sequence - enumerate", "[sequence]")
     REQUIRE_THAT(
         seq::range(10, 15) |= seq::enumerate(0),
         matchers::elements_are(
-            std::tuple{ 0, 10 }, std::tuple{ 1, 11 }, std::tuple{ 2, 12 }, std::tuple{ 3, 13 }, std::tuple{ 4, 142 }));
+            std::tuple{ 0, 10 }, std::tuple{ 1, 11 }, std::tuple{ 2, 12 }, std::tuple{ 3, 13 }, std::tuple{ 4, 14 }));
+}
+
+TEST_CASE("sequence - init", "[sequence]")
+{
+    REQUIRE_THAT(seq::init(6, [](int i) { return 10 * i + 1; }), matchers::elements_are(1, 11, 21, 31, 41, 51));
+}
+
+TEST_CASE("sequence - init_infinite", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::init_infinite([](int i) { return 10 * i + 1; }) |= seq::take(10),
+        matchers::elements_are(1, 11, 21, 31, 41, 51, 61, 71, 81, 91));
+}
+
+TEST_CASE("sequence - unfold", "[sequence]")
+{
+    using state_t = std::pair<int, int>;
+    REQUIRE_THAT(
+        seq::unfold(
+            state_t{ 1, 1 },
+            [](const state_t& s) -> core::optional<std::tuple<int, state_t>>
+            {
+                const auto [prev, cur] = s;
+                if (cur > 20)
+                {
+                    return {};
+                }
+                return std::tuple<int, state_t>{ cur, state_t{ cur + prev, prev } };
+            }),
+        matchers::elements_are(1, 1, 2, 3, 5, 8, 13));
+}
+
+TEST_CASE("sequence - empty", "[sequence]")
+{
+    REQUIRE_THAT(seq::empty<int>(), matchers::is_empty());
+}
+
+TEST_CASE("sequence - view", "[sequence]")
+{
+    std::vector<int> v = { 2, 4, 9, 99, -1 };
+    REQUIRE_THAT(seq::view(v), matchers::elements_are(2, 4, 9, 99, -1));
+}
+
+TEST_CASE("sequence - owning", "[sequence]")
+{
+    REQUIRE_THAT(seq::owning(std::vector<int>{ 2, 4, 9, 99, -1 }), matchers::elements_are(2, 4, 9, 99, -1));
 }
