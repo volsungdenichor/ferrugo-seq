@@ -24,6 +24,22 @@ struct empty_sequence
     }
 };
 
+template <class To, class From>
+struct cast_sequence
+{
+    next_function_t<From> m_from;
+
+    auto operator()() const -> core::optional<To>
+    {
+        core::optional<From> value = m_from();
+        if (value)
+        {
+            return *value;
+        }
+        return {};
+    }
+};
+
 template <class T>
 class sequence_base
 {
@@ -71,6 +87,9 @@ public:
     {
     }
 
+    sequence_base(const sequence_base&) = default;
+    sequence_base(sequence_base&&) = default;
+
     iterator begin() const
     {
         return iterator{ m_next };
@@ -100,6 +119,11 @@ struct sequence : core::range_interface<sequence_base<T>>
 {
     using base_type = core::range_interface<sequence_base<T>>;
     using base_type::base_type;
+
+    template <class U, core::require<std::is_constructible<T, U>{}> = 0>
+    sequence(sequence<U> other) : base_type(cast_sequence<T, U>{ other.get_next() })
+    {
+    }
 
     const typename sequence_base<T>::next_function_type& get_next() const
     {

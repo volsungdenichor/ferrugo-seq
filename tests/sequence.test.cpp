@@ -205,6 +205,8 @@ TEST_CASE("sequence - view", "[sequence]")
 TEST_CASE("sequence - owning", "[sequence]")
 {
     REQUIRE_THAT(seq::owning(std::vector<int>{ 2, 4, 9, 99, -1 }), matchers::elements_are(2, 4, 9, 99, -1));
+    const seq::sequence<int> s = seq::owning(std::vector<int>{ 2, 4, 9, 99, -1 });
+    REQUIRE_THAT(s, matchers::elements_are(2, 4, 9, 99, -1));
 }
 
 TEST_CASE("sequence - maybe_front", "[sequence]")
@@ -222,4 +224,39 @@ TEST_CASE("sequence - find_if", "[sequence]")
 {
     REQUIRE_THAT(bool(seq::range(10) |= seq::find_if([](int x) { return x > 100; })), matchers::equal_to(false));
     REQUIRE_THAT(*(seq::range(10) |= seq::find_if([](int x) { return x > 5; })), matchers::equal_to(6));
+}
+
+TEST_CASE("sequence - all_of", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x >= 0; }), matchers::equal_to(true));
+    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x >= 5; }), matchers::equal_to(false));
+    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x < 20; }), matchers::equal_to(true));
+}
+
+TEST_CASE("sequence - any_of", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x >= 0; }), matchers::equal_to(true));
+    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x >= 5; }), matchers::equal_to(true));
+    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x > 20; }), matchers::equal_to(false));
+}
+
+TEST_CASE("sequence - for_each", "[sequence]")
+{
+    std::stringstream buffer;
+    const auto append = [&](int x) { buffer << " " << x; };
+    seq::range(10) |= seq::for_each(append);
+    REQUIRE_THAT(buffer.str(), matchers::equal_to(" 0 1 2 3 4 5 6 7 8 9"));
+}
+
+TEST_CASE("sequence - for_each_i", "[sequence]")
+{
+    std::stringstream buffer;
+    const auto append = [&](int i, int x) { buffer << " (" << i << ") " << x; };
+    seq::range(5) |= seq::for_each_i(append);
+    REQUIRE_THAT(buffer.str(), matchers::equal_to(" (0) 0 (1) 1 (2) 2 (3) 3 (4) 4"));
+}
+
+TEST_CASE("sequence - fold", "[sequence]")
+{
+    REQUIRE_THAT(seq::range(10) |= seq::fold(0, std::plus<>{}), matchers::equal_to(45));
 }

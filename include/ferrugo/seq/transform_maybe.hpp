@@ -64,7 +64,7 @@ struct transform_maybe_i_fn
     template <class Func>
     auto operator()(Func&& func) const
     {
-        return transform_fn{}(indexed_function(std::forward<Func>(func)));
+        return transform_maybe_fn{}(indexed_function(std::forward<Func>(func)));
     }
 };
 
