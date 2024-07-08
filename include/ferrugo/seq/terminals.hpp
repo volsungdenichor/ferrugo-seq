@@ -146,7 +146,7 @@ struct fold_fn
 
 }  // namespace detail
 
-static const inline auto maybe_front = detail::maybe_front;
+static constexpr inline auto maybe_front = detail::maybe_front;
 static constexpr inline auto nth = detail::nth_fn{};
 static constexpr inline auto find_if = detail::find_if_fn{};
 static constexpr inline auto all_of = detail::all_of_fn{};
