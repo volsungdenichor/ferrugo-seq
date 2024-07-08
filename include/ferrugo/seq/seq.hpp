@@ -6,6 +6,7 @@
 #include <ferrugo/seq/enumerate.hpp>
 #include <ferrugo/seq/filter.hpp>
 #include <ferrugo/seq/initializers.hpp>
+#include <ferrugo/seq/inspect.hpp>
 #include <ferrugo/seq/join.hpp>
 #include <ferrugo/seq/numeric.hpp>
 #include <ferrugo/seq/sequence.hpp>

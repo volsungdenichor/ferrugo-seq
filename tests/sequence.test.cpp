@@ -28,7 +28,7 @@ TEST_CASE("range - lower > upper", "[sequence]")
 
 TEST_CASE("range - linspace", "[sequence]")
 {
-    REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F, 6.F));
+    REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F));
 }
 
 TEST_CASE("sequence - transform", "[sequence]")

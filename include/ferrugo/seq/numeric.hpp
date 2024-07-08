@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ferrugo/seq/sequence.hpp>
+#include <ferrugo/seq/transform.hpp>
 
 namespace ferrugo
 {
@@ -20,6 +21,7 @@ struct iota_fn
             return m_current++;
         }
     };
+
     template <class T>
     auto operator()(T init) const -> sequence<T>
     {
@@ -59,30 +61,11 @@ struct range_fn
 
 struct linspace_fn
 {
-    template <class In>
-    struct next_function
-    {
-        In m_lower;
-        In m_upper;
-        ptrdiff_t m_count;
-        mutable std::ptrdiff_t m_current = 0;
-
-        auto operator()() const -> core::optional<In>
-        {
-            if (m_current >= m_upper)
-            {
-                return {};
-            }
-            std::ptrdiff_t n = m_current++;
-            return m_lower + n * (m_upper - m_lower) / (m_count - 1);
-        };
-    };
-
     template <class T>
     constexpr auto operator()(T lower, T upper, std::ptrdiff_t count) const -> sequence<T>
     {
-        static_assert(std::is_floating_point_v<T>, "linspace: floating point type expected");
-        return sequence<T>{ next_function<T>{ lower, upper, count } };
+        return range_fn{}(count)
+               |= seq::transform([=](std::ptrdiff_t n) -> T { return lower + n * (upper - lower) / (count - 1); });
     }
 };
 
