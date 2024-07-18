@@ -260,3 +260,10 @@ TEST_CASE("sequence - fold", "[sequence]")
 {
     REQUIRE_THAT(seq::range(10) |= seq::fold(0, std::plus<>{}), matchers::equal_to(45));
 }
+
+TEST_CASE("sequence - copy", "[sequence]")
+{
+    std::vector<int> out{ -1, -2, -3 };
+    seq::range(5) |= seq::copy(std::back_inserter(out));
+    REQUIRE_THAT(out, matchers::elements_are(-1, -2, -3, 0, 1, 2, 3, 4));
+}

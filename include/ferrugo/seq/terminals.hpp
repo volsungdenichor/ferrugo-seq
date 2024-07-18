@@ -144,6 +144,27 @@ struct fold_fn
     }
 };
 
+struct copy_fn
+{
+    template <class Out>
+    struct impl
+    {
+        Out m_out;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> Out
+        {
+            return std::copy(std::begin(s), std::end(s), m_out);
+        }
+    };
+
+    template <class Out>
+    auto operator()(Out out) const
+    {
+        return core::pipe(impl<Out>{ std::move(out) });
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto maybe_front = detail::maybe_front;
@@ -154,5 +175,6 @@ static constexpr inline auto any_of = detail::any_of_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto for_each_i = detail::for_each_i_fn{};
 static constexpr inline auto fold = detail::fold_fn{};
+static constexpr inline auto copy = detail::copy_fn{};
 }  // namespace seq
 }  // namespace ferrugo
