@@ -60,6 +60,31 @@ struct filter_fn
 
 struct filter_i_fn
 {
+    template <class Pred, class In>
+    struct next_function
+    {
+        Pred m_pred;
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_index = 0;
+
+        auto operator()() const -> core::optional<In>
+        {
+            while (true)
+            {
+                core::optional<In> res = m_next();
+                if (!res)
+                {
+                    break;
+                }
+
+                if (std::invoke(m_pred, m_index++, *res))
+                {
+                    return res;
+                }
+            }
+            return {};
+        }
+    };
     template <class Pred>
     struct impl
     {
@@ -68,7 +93,7 @@ struct filter_i_fn
         template <class T>
         auto operator()(const sequence<T>& s) const -> sequence<T>
         {
-            return filter_fn{}(indexed_function(m_func))(s);
+            return sequence<T>{ next_function<Pred, T>{ m_func, s.get_next() } };
         }
     };
 

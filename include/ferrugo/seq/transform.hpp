@@ -52,6 +52,24 @@ struct transform_fn
 
 struct transform_i_fn
 {
+    template <class Func, class In, class Out>
+    struct next_function
+    {
+        Func m_func;
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_index = 0;
+
+        auto operator()() const -> core::optional<Out>
+        {
+            core::optional<In> res = m_next();
+            if (!res)
+            {
+                return {};
+            }
+            return std::invoke(m_func, m_index++, *res);
+        }
+    };
+
     template <class Func>
     struct impl
     {
@@ -60,7 +78,7 @@ struct transform_i_fn
         template <class T, class Out = std::invoke_result_t<Func, std::ptrdiff_t, T>>
         auto operator()(const sequence<T>& s) const -> sequence<Out>
         {
-            return transform_fn{}(indexed_function(m_func))(s);
+            return sequence<Out>{ next_function<Func, T, Out>{ m_func, s.get_next() } };
         }
     };
 
