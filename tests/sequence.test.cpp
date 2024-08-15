@@ -45,6 +45,13 @@ TEST_CASE("sequence - transform_i", "[sequence]")
         matchers::elements_are("0"s, "11"s, "22"s, "33"s, "44"s, "55"s, "66"s, "77"s, "88"s, "99"s));
 }
 
+TEST_CASE("sequence - transform_i - multiple pass", "[sequence]")
+{
+    const auto op = seq::transform_i([](int i, int x) { return std::to_string(i + x * 10); });
+    REQUIRE_THAT(seq::range(5) |= op, matchers::elements_are("0"s, "11"s, "22"s, "33"s, "44"s));
+    REQUIRE_THAT(seq::range(5) |= op, matchers::elements_are("0"s, "11"s, "22"s, "33"s, "44"s));
+}
+
 TEST_CASE("sequence - transform_maybe", "[sequence]")
 {
     const auto f = [](int x) -> core::optional<std::string>
@@ -77,6 +84,25 @@ TEST_CASE("sequence - transform_maybe_i", "[sequence]")
         matchers::elements_are("_0"s, "2"s, "_3"s, "4"s, "_6"s, "8"s, "_9"s));
 }
 
+TEST_CASE("sequence - transform_maybe_i - multiple pass", "[sequence]")
+{
+    const auto f = [](int i, int x) -> core::optional<std::string>
+    {
+        if (i % 3 == 0)
+        {
+            return "_" + std::to_string(i);
+        }
+        if (x % 2 == 0)
+        {
+            return std::to_string(x);
+        }
+        return {};
+    };
+    const auto op = seq::transform_maybe_i(f);
+    REQUIRE_THAT(seq::range(0, 5) |= op, matchers::elements_are("_0", "2", "_3", "4"));
+    REQUIRE_THAT(seq::range(0, 5) |= op, matchers::elements_are("_0", "2", "_3", "4"));
+}
+
 TEST_CASE("sequence - filter", "[sequence]")
 {
     REQUIRE_THAT(seq::range(0, 10) |= seq::filter([](int x) { return x % 3 == 0; }), matchers::elements_are(0, 3, 6, 9));
@@ -87,6 +113,13 @@ TEST_CASE("sequence - filter_i", "[sequence]")
     REQUIRE_THAT(
         seq::range(0, 10) |= seq::filter_i([](int i, int x) { return i % 2 == 0 && x % 3 == 0; }),
         matchers::elements_are(0, 6));
+}
+
+TEST_CASE("sequence - filter_i - mi", "[sequence]")
+{
+    const auto op = seq::filter_i([](int i, int x) { return i % 3 == 0; });
+    REQUIRE_THAT(seq::range(0, 10) |= op, matchers::elements_are(0, 3, 6, 9));
+    REQUIRE_THAT(seq::range(0, 10) |= op, matchers::elements_are(0, 3, 6, 9));
 }
 
 TEST_CASE("sequence - take", "[sequence]")

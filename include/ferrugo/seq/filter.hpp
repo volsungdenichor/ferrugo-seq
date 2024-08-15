@@ -61,9 +61,21 @@ struct filter_fn
 struct filter_i_fn
 {
     template <class Pred>
+    struct impl
+    {
+        Pred m_func;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> sequence<T>
+        {
+            return filter_fn{}(indexed_function(m_func))(s);
+        }
+    };
+
+    template <class Pred>
     auto operator()(Pred&& pred) const
     {
-        return filter_fn{}(indexed_function(std::forward<Pred>(pred)));
+        return core::pipe(impl<std::decay_t<Pred>>{ std::forward<Pred>(pred) });
     }
 };
 

@@ -53,9 +53,21 @@ struct transform_fn
 struct transform_i_fn
 {
     template <class Func>
+    struct impl
+    {
+        Func m_func;
+
+        template <class T, class Out = std::invoke_result_t<Func, std::ptrdiff_t, T>>
+        auto operator()(const sequence<T>& s) const -> sequence<Out>
+        {
+            return transform_fn{}(indexed_function(m_func))(s);
+        }
+    };
+
+    template <class Func>
     auto operator()(Func&& func) const
     {
-        return transform_fn{}(indexed_function(std::forward<Func>(func)));
+        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
