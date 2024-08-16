@@ -242,6 +242,11 @@ TEST_CASE("sequence - owning", "[sequence]")
     REQUIRE_THAT(s, matchers::elements_are(2, 4, 9, 99, -1));
 }
 
+TEST_CASE("sequence - vec", "[sequence]")
+{
+    REQUIRE_THAT(seq::vec(2, 4, 9, 99, -1), matchers::elements_are(2, 4, 9, 99, -1));
+}
+
 TEST_CASE("sequence - maybe_front", "[sequence]")
 {
     REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));

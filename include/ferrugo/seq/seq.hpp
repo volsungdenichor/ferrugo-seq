@@ -10,7 +10,7 @@
 #include <ferrugo/seq/numeric.hpp>
 #include <ferrugo/seq/sequence.hpp>
 #include <ferrugo/seq/slice.hpp>
-#include <ferrugo/seq/take_while_drop_while.hpp>
+#include <ferrugo/seq/take_drop_while.hpp>
 #include <ferrugo/seq/terminals.hpp>
 #include <ferrugo/seq/transform.hpp>
 #include <ferrugo/seq/transform_maybe.hpp>

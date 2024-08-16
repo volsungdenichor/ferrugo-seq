@@ -83,9 +83,20 @@ struct owning_fn
     }
 };
 
+struct vec_fn
+{
+    template <class T, class... Tail>
+    auto operator()(T head, Tail&&... tail) const -> sequence<const T&>
+    {
+        return owning_fn{}(std::vector<T>{ std::move(head), std::forward<Tail>(tail)... });
+    }
+};
+
 }  // namespace detail
 
 static constexpr inline auto view = detail::view_fn{};
 static constexpr inline auto owning = detail::owning_fn{};
+static constexpr inline auto vec = detail::vec_fn{};
+
 }  // namespace seq
 }  // namespace ferrugo

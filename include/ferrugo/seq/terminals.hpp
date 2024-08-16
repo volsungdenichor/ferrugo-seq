@@ -95,7 +95,12 @@ struct for_each_fn
         template <class T>
         void operator()(const sequence<T>& s) const
         {
-            std::for_each(std::begin(s), std::end(s), std::ref(m_func));
+            auto it = std::begin(s);
+            const auto end = std::end(s);
+            for (; it != end; ++it)
+            {
+                std::invoke(m_func, *it);
+            }
         }
     };
 
@@ -109,9 +114,27 @@ struct for_each_fn
 struct for_each_i_fn
 {
     template <class Func>
+    struct impl
+    {
+        Func m_func;
+
+        template <class T>
+        void operator()(const sequence<T>& s) const
+        {
+            auto it = std::begin(s);
+            const auto end = std::end(s);
+            std::ptrdiff_t index = 0;
+            for (; it != end; ++it, ++index)
+            {
+                std::invoke(m_func, index, *it);
+            }
+        }
+    };
+
+    template <class Func>
     auto operator()(Func&& func) const
     {
-        return for_each_fn{}(indexed_function(std::forward<Func>(func)));
+        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 

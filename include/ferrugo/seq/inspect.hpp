@@ -51,10 +51,39 @@ struct inspect_fn
 
 struct inspect_i_fn
 {
+    template <class Func, class In>
+    struct next_function
+    {
+        Func m_func;
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_index = 0;
+
+        auto operator()() const -> core::optional<In>
+        {
+            core::optional<In> res = m_next();
+            if (res)
+            {
+                std::invoke(m_func, m_index++, *res);
+            }
+            return res;
+        }
+    };
+    template <class Func>
+    struct impl
+    {
+        Func m_func;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> sequence<T>
+        {
+            return sequence<T>{ next_function<Func, T>{ m_func, s.get_next() } };
+        }
+    };
+
     template <class Func>
     auto operator()(Func&& func) const
     {
-        return inspect_fn{}(indexed_function(std::forward<Func>(func)));
+        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
     }
 };
 
