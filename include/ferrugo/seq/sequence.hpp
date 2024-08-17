@@ -48,11 +48,11 @@ public:
 
     struct iter
     {
-        iter() : m_next(), m_current{}, m_index{ std::numeric_limits<std::ptrdiff_t>::max() }
+        iter() : m_next{}, m_current{}, m_index{ std::numeric_limits<std::ptrdiff_t>::max() }
         {
         }
 
-        iter(next_function_type next) : m_next(std::move(next)), m_current{ m_next() }, m_index{ 0 }
+        iter(next_function_type next) : m_next{ std::move(next) }, m_current{ m_next() }, m_index{ 0 }
         {
         }
 

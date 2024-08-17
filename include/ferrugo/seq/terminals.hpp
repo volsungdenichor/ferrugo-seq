@@ -43,6 +43,37 @@ struct find_if_fn
     }
 };
 
+struct index_of_fn
+{
+    template <class Pred>
+    struct impl
+    {
+        Pred m_pred;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> core::optional<std::ptrdiff_t>
+        {
+            std::ptrdiff_t index = 0;
+            auto it = std::begin(s);
+            const auto end = std::end(s);
+            for (; it != end; ++it, ++index)
+            {
+                if (std::invoke(m_pred, *it))
+                {
+                    return index;
+                }
+            }
+            return {};
+        }
+    };
+
+    template <class Pred>
+    auto operator()(Pred&& pred) const
+    {
+        return core::pipe(impl<std::decay_t<Pred>>{ std::forward<Pred>(pred) });
+    }
+};
+
 struct all_of_fn
 {
     template <class Pred>
@@ -193,11 +224,13 @@ struct copy_fn
 static constexpr inline auto maybe_front = detail::maybe_front;
 static constexpr inline auto nth = detail::nth_fn{};
 static constexpr inline auto find_if = detail::find_if_fn{};
+static constexpr inline auto index_of = detail::index_of_fn{};
 static constexpr inline auto all_of = detail::all_of_fn{};
 static constexpr inline auto any_of = detail::any_of_fn{};
 static constexpr inline auto for_each = detail::for_each_fn{};
 static constexpr inline auto for_each_i = detail::for_each_i_fn{};
 static constexpr inline auto fold = detail::fold_fn{};
 static constexpr inline auto copy = detail::copy_fn{};
+
 }  // namespace seq
 }  // namespace ferrugo
