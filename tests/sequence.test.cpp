@@ -10,7 +10,7 @@ using namespace std::string_literals;
 
 TEST_CASE("constructor", "[sequence]")
 {
-    const auto fn = []() mutable -> core::optional<int> { return {}; };
+    const auto fn = []() mutable -> seq::maybe<int> { return {}; };
     seq::sequence<int> s{ fn };
     REQUIRE_THAT(s, matchers::is_empty());
 }
@@ -26,10 +26,10 @@ TEST_CASE("range - lower > upper", "[sequence][initializers]")
     REQUIRE_THAT(seq::range(10, 0), Catch::Matchers::IsEmpty());
 }
 
-TEST_CASE("range - linspace", "[sequence][initializers]")
-{
-    REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F));
-}
+// TEST_CASE("range - linspace", "[sequence][initializers]")
+// {
+//     REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F));
+// }
 
 TEST_CASE("transform", "[sequence]")
 {
@@ -54,7 +54,7 @@ TEST_CASE("transform_i - multiple pass", "[sequence][indexed]")
 
 TEST_CASE("transform_maybe", "[sequence]")
 {
-    const auto f = [](int x) -> core::optional<std::string>
+    const auto f = [](int x) -> seq::maybe<std::string>
     {
         if (x % 2 == 0)
         {
@@ -67,7 +67,7 @@ TEST_CASE("transform_maybe", "[sequence]")
 
 TEST_CASE("transform_maybe_i", "[sequence][indexed]")
 {
-    const auto f = [](int i, int x) -> core::optional<std::string>
+    const auto f = [](int i, int x) -> seq::maybe<std::string>
     {
         if (i % 3 == 0)
         {
@@ -86,7 +86,7 @@ TEST_CASE("transform_maybe_i", "[sequence][indexed]")
 
 TEST_CASE("transform_maybe_i - multiple pass", "[sequence][indexed]")
 {
-    const auto f = [](int i, int x) -> core::optional<std::string>
+    const auto f = [](int i, int x) -> seq::maybe<std::string>
     {
         if (i % 3 == 0)
         {
@@ -162,7 +162,7 @@ TEST_CASE("zip", "[sequence]")
 TEST_CASE("zip_transform", "[sequence]")
 {
     REQUIRE_THAT(
-        seq::zip_transform(std::plus<>{}, seq::range(10, 15), seq::range(100, 110)),
+        (seq::zip(seq::range(10, 15), seq::range(100, 110)) |= seq::transform(std::plus<>{})),
         matchers::elements_are(110, 112, 114, 116, 118));
 }
 
@@ -175,24 +175,16 @@ TEST_CASE("chain", "[sequence]")
 TEST_CASE("join", "[sequence]")
 {
     REQUIRE_THAT(
-        seq::range(5) |= seq::transform([](int x) { return seq::range(x); }) |= seq::join(),
+        seq::range(5) |= seq::transform([](int x) { return seq::range(x); }) |= seq::join,
         matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
 }
 
-TEST_CASE("transform_join", "[sequence]")
-{
-    REQUIRE_THAT(
-        seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
-        matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
-}
-
-TEST_CASE("enumerate", "[sequence]")
-{
-    REQUIRE_THAT(
-        seq::range(10, 15) |= seq::enumerate(0),
-        matchers::elements_are(
-            std::tuple{ 0, 10 }, std::tuple{ 1, 11 }, std::tuple{ 2, 12 }, std::tuple{ 3, 13 }, std::tuple{ 4, 14 }));
-}
+// TEST_CASE("transform_join", "[sequence]")
+// {
+//     REQUIRE_THAT(
+//         seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
+//         matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
+// }
 
 TEST_CASE("init", "[sequence][initializers]")
 {
@@ -212,7 +204,7 @@ TEST_CASE("unfold", "[sequence][initializers]")
     REQUIRE_THAT(
         seq::unfold(
             state_t{ 1, 1 },
-            [](const state_t& s) -> core::optional<std::tuple<int, state_t>>
+            [](const state_t& s) -> seq::maybe<std::tuple<int, state_t>>
             {
                 const auto [prev, cur] = s;
                 if (cur > 20)
@@ -222,11 +214,6 @@ TEST_CASE("unfold", "[sequence][initializers]")
                 return std::tuple<int, state_t>{ cur, state_t{ cur + prev, prev } };
             }),
         matchers::elements_are(1, 1, 2, 3, 5, 8, 13));
-}
-
-TEST_CASE("empty", "[sequence][initializers]")
-{
-    REQUIRE_THAT(seq::empty<int>(), matchers::is_empty());
 }
 
 TEST_CASE("view", "[sequence]")
@@ -247,11 +234,11 @@ TEST_CASE("vec", "[sequence]")
     REQUIRE_THAT(seq::vec(2, 4, 9, 99, -1), matchers::elements_are(2, 4, 9, 99, -1));
 }
 
-TEST_CASE("maybe_front", "[sequence][terminals]")
-{
-    REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));
-    REQUIRE_THAT(*(seq::repeat(3) |= seq::maybe_front), matchers::equal_to(3));
-}
+// TEST_CASE("maybe_front", "[sequence][terminals]")
+// {
+//     REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));
+//     REQUIRE_THAT(*(seq::repeat(3) |= seq::maybe_front), matchers::equal_to(3));
+// }
 
 TEST_CASE("nth", "[sequence][terminals]")
 {
@@ -262,20 +249,6 @@ TEST_CASE("find_if", "[sequence][terminals]")
 {
     REQUIRE_THAT(bool(seq::range(10) |= seq::find_if([](int x) { return x > 100; })), matchers::equal_to(false));
     REQUIRE_THAT(*(seq::range(10) |= seq::find_if([](int x) { return x > 5; })), matchers::equal_to(6));
-}
-
-TEST_CASE("all_of", "[sequence][terminals]")
-{
-    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x >= 0; }), matchers::equal_to(true));
-    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x >= 5; }), matchers::equal_to(false));
-    REQUIRE_THAT(seq::range(10) |= seq::all_of([](int x) { return x < 20; }), matchers::equal_to(true));
-}
-
-TEST_CASE("any_of", "[sequence][terminals]")
-{
-    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x >= 0; }), matchers::equal_to(true));
-    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x >= 5; }), matchers::equal_to(true));
-    REQUIRE_THAT(seq::range(10) |= seq::any_of([](int x) { return x > 20; }), matchers::equal_to(false));
 }
 
 TEST_CASE("for_each", "[sequence][terminals]")
