@@ -1,7 +1,7 @@
 #pragma once
 
+#include <ferrugo/seq/pipe.hpp>
 #include <ferrugo/seq/sequence.hpp>
-#include <ferrugo/seq/transform.hpp>
 
 namespace ferrugo
 {
@@ -20,13 +20,13 @@ struct join_fn
         next_function_t<sequence<In>> m_next;
         mutable next_function_t<In> m_sub = {};
 
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
             while (true)
             {
                 if (!m_sub)
                 {
-                    core::optional<sequence<In>> next = m_next();
+                    maybe<sequence<In>> next = m_next();
                     if (!next)
                     {
                         return {};
@@ -34,7 +34,7 @@ struct join_fn
                     m_sub = next->get_next();
                     continue;
                 }
-                core::optional<In> next_sub = m_sub();
+                maybe<In> next_sub = m_sub();
                 if (next_sub)
                 {
                     return next_sub;
@@ -49,46 +49,16 @@ struct join_fn
         }
     };
 
-    struct impl
+    template <class T>
+    auto operator()(const sequence<sequence<T>>& s) const -> sequence<T>
     {
-        template <class T>
-        auto operator()(const sequence<sequence<T>>& s) const -> sequence<T>
-        {
-            return sequence<T>{ next_function<T>{ s.get_next() } };
-        }
-    };
-
-    auto operator()() const
-    {
-        return core::pipe(impl{});
-    }
-};
-
-struct transform_join_fn
-{
-    template <class Func>
-    struct impl
-    {
-        Func m_func;
-
-        template <class T, class Out = sequence_underlying_type_t<std::invoke_result_t<Func, T>>>
-        auto operator()(const sequence<T>& s) const -> sequence<Out>
-        {
-            return join_fn{}()(transform_fn{}(m_func)(s));
-        }
-    };
-
-    template <class Func>
-    auto operator()(Func&& func) const
-    {
-        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
+        return sequence<T>{ next_function<T>{ s.get_next() } };
     }
 };
 
 }  // namespace detail
 
-static constexpr inline auto join = detail::join_fn{};
-static constexpr inline auto transform_join = detail::transform_join_fn{};
+static constexpr inline auto join = pipe_t<detail::join_fn>{ detail::join_fn{} };
 
 }  // namespace seq
 }  // namespace ferrugo

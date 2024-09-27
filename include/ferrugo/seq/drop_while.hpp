@@ -13,30 +13,34 @@ namespace seq
 namespace detail
 {
 
-struct filter_fn
+struct drop_while_fn
 {
     template <class Pred, class In>
     struct next_function
     {
         Pred m_pred;
         next_function_t<In> m_next;
+        mutable bool m_init = true;
 
         auto operator()() const -> maybe<In>
         {
-            while (true)
+            if (m_init)
             {
-                maybe<In> res = m_next();
-                if (!res)
+                while (true)
                 {
-                    break;
-                }
-
-                if (invoke(m_pred, *res))
-                {
-                    return res;
+                    maybe<In> res = m_next();
+                    if (!res)
+                    {
+                        return {};
+                    }
+                    if (!invoke(m_pred, *res))
+                    {
+                        m_init = false;
+                        return res;
+                    }
                 }
             }
-            return {};
+            return m_next();
         }
     };
 
@@ -59,7 +63,7 @@ struct filter_fn
     }
 };
 
-struct filter_i_fn
+struct drop_while_i_fn
 {
     template <class Pred, class In>
     struct next_function
@@ -67,23 +71,27 @@ struct filter_i_fn
         Pred m_pred;
         next_function_t<In> m_next;
         mutable std::ptrdiff_t m_index = 0;
+        mutable bool m_init = true;
 
         auto operator()() const -> maybe<In>
         {
-            while (true)
+            if (m_init)
             {
-                maybe<In> res = m_next();
-                if (!res)
+                while (true)
                 {
-                    break;
-                }
-
-                if (invoke(m_pred, concat(m_index++, *res)))
-                {
-                    return res;
+                    maybe<In> res = m_next();
+                    if (!res)
+                    {
+                        return {};
+                    }
+                    if (!invoke(m_pred, concat(m_index++, *res)))
+                    {
+                        m_init = false;
+                        return res;
+                    }
                 }
             }
-            return {};
+            return m_next();
         }
     };
 
@@ -108,8 +116,8 @@ struct filter_i_fn
 
 }  // namespace detail
 
-static constexpr inline auto filter = detail::filter_fn{};
-static constexpr inline auto filter_i = detail::filter_i_fn{};
+static constexpr inline auto drop_while = detail::drop_while_fn{};
+static constexpr inline auto drop_while_i = detail::drop_while_i_fn{};
 
 }  // namespace seq
 }  // namespace ferrugo

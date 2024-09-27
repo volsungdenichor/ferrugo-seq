@@ -1,97 +1,109 @@
 #pragma once
 
+#include <ferrugo/seq/invoke.hpp>
 #include <ferrugo/seq/sequence.hpp>
 
 namespace ferrugo
 {
-
 namespace seq
 {
+
+struct slice_t
+{
+    std::ptrdiff_t start = 0;
+    maybe<std::ptrdiff_t> stop = {};
+    std::ptrdiff_t step = 1;
+};
 
 namespace detail
 {
 
-template <class In>
-struct drop_impl
-{
-    mutable std::ptrdiff_t m_count;
-    next_function_t<In> m_next;
-
-    auto operator()() const -> core::optional<In>
-    {
-        while (m_count-- > 0)
-        {
-            m_next();
-        }
-        return m_next();
-    }
-};
-
-template <class In>
-struct take_impl
-{
-    mutable std::ptrdiff_t m_count;
-    next_function_t<In> m_next;
-
-    auto operator()() const -> core::optional<In>
-    {
-        if (m_count-- > 0)
-        {
-            return m_next();
-        }
-        return {};
-    }
-};
-
-template <class In>
-struct step_impl
-{
-    mutable std::ptrdiff_t m_count;
-    next_function_t<In> m_next;
-    mutable std::ptrdiff_t m_index = 0;
-
-    auto operator()() const -> core::optional<In>
-    {
-        while (true)
-        {
-            core::optional<In> n = m_next();
-            if (!n)
-            {
-                break;
-            }
-            if (m_index++ % m_count == 0)
-            {
-                return n;
-            }
-        }
-        return {};
-    }
-};
-
-template <template <class> class Impl>
 struct slice_fn
 {
-    struct impl
+    template <class In>
+    struct next_function
     {
-        std::ptrdiff_t m_count;
+        slice_t m_slice;
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_index = 0;
+
+        auto operator()() const -> maybe<In>
+        {
+            while (true)
+            {
+                maybe<In> res = m_next();
+                const std::ptrdiff_t index = m_index++;
+                if (!res)
+                {
+                    break;
+                }
+
+                if (index < m_slice.start)
+                {
+                    continue;
+                }
+
+                if (m_slice.stop && (index >= *m_slice.stop))
+                {
+                    break;
+                }
+
+                if ((index - m_slice.start) % m_slice.step == 0)
+                {
+                    return res;
+                }
+            }
+            return {};
+        }
+    };
+
+    struct impl_t
+    {
+        slice_t m_slice;
 
         template <class T>
         auto operator()(const sequence<T>& s) const -> sequence<T>
         {
-            return sequence<T>{ Impl<T>{ m_count, s.get_next() } };
+            return sequence<T>{ next_function<T>{ m_slice, s.get_next() } };
         }
     };
 
-    auto operator()(std::ptrdiff_t count) const
+    auto operator()(slice_t slice) const -> pipe_t<impl_t>
     {
-        return core::pipe(impl{ count });
+        return { { slice } };
+    }
+};
+
+struct drop_fn
+{
+    auto operator()(std::ptrdiff_t n) const
+    {
+        return slice_fn{}({ n, {}, 1 });
+    }
+};
+
+struct take_fn
+{
+    auto operator()(std::ptrdiff_t n) const
+    {
+        return slice_fn{}({ 0, n, 1 });
+    }
+};
+
+struct step_fn
+{
+    auto operator()(std::ptrdiff_t n) const
+    {
+        return slice_fn{}({ 0, {}, n });
     }
 };
 
 }  // namespace detail
 
-static constexpr inline auto drop = detail::slice_fn<detail::drop_impl>{};
-static constexpr inline auto take = detail::slice_fn<detail::take_impl>{};
-static constexpr inline auto step = detail::slice_fn<detail::step_impl>{};
+static constexpr inline auto slice = detail::slice_fn{};
+static constexpr inline auto drop = detail::drop_fn{};
+static constexpr inline auto take = detail::take_fn{};
+static constexpr inline auto step = detail::step_fn{};
+
 }  // namespace seq
 }  // namespace ferrugo

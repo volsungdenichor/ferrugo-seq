@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ferrugo/seq/sequence.hpp>
-#include <ferrugo/seq/transform.hpp>
 
 namespace ferrugo
 {
@@ -16,7 +15,7 @@ struct iota_fn
     struct next_function
     {
         mutable In m_current;
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
             return m_current++;
         }
@@ -37,7 +36,7 @@ struct range_fn
         mutable In m_current;
         In m_upper;
 
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
             if (m_current >= m_upper)
             {
@@ -46,6 +45,7 @@ struct range_fn
             return m_current++;
         }
     };
+
     template <class T>
     auto operator()(T lower, T upper) const -> sequence<T>
     {
@@ -59,21 +59,10 @@ struct range_fn
     }
 };
 
-struct linspace_fn
-{
-    template <class T>
-    constexpr auto operator()(T lower, T upper, std::ptrdiff_t count) const -> sequence<T>
-    {
-        return range_fn{}(count)
-               |= seq::transform([=](std::ptrdiff_t n) -> T { return lower + n * (upper - lower) / (count - 1); });
-    }
-};
-
 }  // namespace detail
 
 static constexpr inline auto iota = detail::iota_fn{};
 static constexpr inline auto range = detail::range_fn{};
-static constexpr inline auto linspace = detail::linspace_fn{};
 
 }  // namespace seq
 }  // namespace ferrugo

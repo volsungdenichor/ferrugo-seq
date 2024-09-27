@@ -1,7 +1,8 @@
 #pragma once
 
+#include <ferrugo/seq/invoke.hpp>
+#include <ferrugo/seq/pipe.hpp>
 #include <ferrugo/seq/sequence.hpp>
-#include <ferrugo/seq/utils.hpp>
 
 namespace ferrugo
 {
@@ -19,19 +20,19 @@ struct inspect_fn
         Func m_func;
         next_function_t<In> m_next;
 
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
-            core::optional<In> res = m_next();
+            maybe<In> res = m_next();
             if (res)
             {
-                std::invoke(m_func, *res);
+                invoke(m_func, *res);
             }
             return res;
         }
     };
 
     template <class Func>
-    struct impl
+    struct impl_t
     {
         Func m_func;
 
@@ -43,9 +44,9 @@ struct inspect_fn
     };
 
     template <class Func>
-    auto operator()(Func&& func) const
+    auto operator()(Func&& func) const -> pipe_t<impl_t<std::decay_t<Func>>>
     {
-        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
+        return { { std::forward<Func>(func) } };
     }
 };
 
@@ -58,18 +59,19 @@ struct inspect_i_fn
         next_function_t<In> m_next;
         mutable std::ptrdiff_t m_index = 0;
 
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
-            core::optional<In> res = m_next();
+            maybe<In> res = m_next();
             if (res)
             {
-                std::invoke(m_func, m_index++, *res);
+                invoke(m_func, concat(m_index++, *res));
             }
             return res;
         }
     };
+
     template <class Func>
-    struct impl
+    struct impl_t
     {
         Func m_func;
 
@@ -81,9 +83,9 @@ struct inspect_i_fn
     };
 
     template <class Func>
-    auto operator()(Func&& func) const
+    auto operator()(Func&& func) const -> pipe_t<impl_t<std::decay_t<Func>>>
     {
-        return core::pipe(impl<std::decay_t<Func>>{ std::forward<Func>(func) });
+        return { { std::forward<Func>(func) } };
     }
 };
 

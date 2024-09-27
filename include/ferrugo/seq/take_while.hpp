@@ -13,7 +13,7 @@ namespace seq
 namespace detail
 {
 
-struct filter_fn
+struct take_while_fn
 {
     template <class Pred, class In>
     struct next_function
@@ -23,20 +23,12 @@ struct filter_fn
 
         auto operator()() const -> maybe<In>
         {
-            while (true)
+            maybe<In> res = m_next();
+            if (!(res && invoke(m_pred, *res)))
             {
-                maybe<In> res = m_next();
-                if (!res)
-                {
-                    break;
-                }
-
-                if (invoke(m_pred, *res))
-                {
-                    return res;
-                }
+                return {};
             }
-            return {};
+            return res;
         }
     };
 
@@ -59,7 +51,7 @@ struct filter_fn
     }
 };
 
-struct filter_i_fn
+struct take_while_i_fn
 {
     template <class Pred, class In>
     struct next_function
@@ -70,20 +62,12 @@ struct filter_i_fn
 
         auto operator()() const -> maybe<In>
         {
-            while (true)
+            maybe<In> res = m_next();
+            if (!(res && invoke(m_pred, concat(m_index++, *res))))
             {
-                maybe<In> res = m_next();
-                if (!res)
-                {
-                    break;
-                }
-
-                if (invoke(m_pred, concat(m_index++, *res)))
-                {
-                    return res;
-                }
+                return {};
             }
-            return {};
+            return res;
         }
     };
 
@@ -108,8 +92,8 @@ struct filter_i_fn
 
 }  // namespace detail
 
-static constexpr inline auto filter = detail::filter_fn{};
-static constexpr inline auto filter_i = detail::filter_i_fn{};
+static constexpr inline auto take_while = detail::take_while_fn{};
+static constexpr inline auto take_while_i = detail::take_while_i_fn{};
 
 }  // namespace seq
 }  // namespace ferrugo

@@ -20,11 +20,11 @@ struct chain_fn
         next_function_t<In> m_second;
         mutable bool m_first_finished = false;
 
-        auto operator()() const -> core::optional<In>
+        auto operator()() const -> maybe<In>
         {
             if (!m_first_finished)
             {
-                core::optional<In> n = m_first();
+                maybe<In> n = m_first();
                 if (n)
                 {
                     return n;
