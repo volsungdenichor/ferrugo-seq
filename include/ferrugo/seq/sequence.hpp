@@ -174,9 +174,16 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const sequence& item)
     {
-        return os << "sequence<"
-                  << "???"
-                  << ">";
+        // return os << "sequence<"
+        //           << "???"
+        //           << ">";
+        os << "[";
+        for (const auto& v : item)
+        {
+            os << " " << v;
+        }
+        os << " ]";
+        return os;
     }
 
 private:

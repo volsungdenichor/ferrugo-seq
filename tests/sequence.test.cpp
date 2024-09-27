@@ -26,10 +26,10 @@ TEST_CASE("range - lower > upper", "[sequence][initializers]")
     REQUIRE_THAT(seq::range(10, 0), Catch::Matchers::IsEmpty());
 }
 
-// TEST_CASE("range - linspace", "[sequence][initializers]")
-// {
-//     REQUIRE_THAT(seq::linspace(2.F, 5.F, 4), matchers::elements_are(2.F, 3.F, 4.F, 5.F));
-// }
+TEST_CASE("range - linspace", "[sequence][initializers]")
+{
+    REQUIRE_THAT(seq::linspace(2.F, 5.F, 6), matchers::elements_are(2.0F, 2.6F, 3.2F, 3.8F, 4.4F, 5.0F));
+}
 
 TEST_CASE("transform", "[sequence]")
 {
@@ -234,11 +234,11 @@ TEST_CASE("vec", "[sequence]")
     REQUIRE_THAT(seq::vec(2, 4, 9, 99, -1), matchers::elements_are(2, 4, 9, 99, -1));
 }
 
-// TEST_CASE("maybe_front", "[sequence][terminals]")
-// {
-//     REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));
-//     REQUIRE_THAT(*(seq::repeat(3) |= seq::maybe_front), matchers::equal_to(3));
-// }
+TEST_CASE("maybe_front", "[sequence][terminals]")
+{
+    REQUIRE_THAT(bool(seq::empty<int>() |= seq::maybe_front), matchers::equal_to(false));
+    REQUIRE_THAT(*(seq::repeat(3) |= seq::maybe_front), matchers::equal_to(3));
+}
 
 TEST_CASE("nth", "[sequence][terminals]")
 {

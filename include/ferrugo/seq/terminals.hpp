@@ -23,7 +23,7 @@ struct maybe_front_fn
     }
 };
 
-static const inline auto maybe_front = detail::maybe_front_fn{};
+static const inline auto maybe_front = pipe_t<detail::maybe_front_fn>{ detail::maybe_front_fn{} };
 
 struct nth_fn
 {

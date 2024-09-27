@@ -5,7 +5,6 @@
 #include <ferrugo/seq/filter.hpp>
 #include <ferrugo/seq/initializers.hpp>
 #include <ferrugo/seq/join.hpp>
-#include <ferrugo/seq/numeric.hpp>
 #include <ferrugo/seq/owning.hpp>
 #include <ferrugo/seq/slice.hpp>
 #include <ferrugo/seq/take_while.hpp>
@@ -15,11 +14,3 @@
 #include <ferrugo/seq/vec.hpp>
 #include <ferrugo/seq/view.hpp>
 #include <ferrugo/seq/zip.hpp>
-
-namespace ferrugo
-{
-namespace seq
-{
-
-}  // namespace seq
-}  // namespace ferrugo
