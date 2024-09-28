@@ -12,34 +12,61 @@ namespace detail
 
 struct cartesian_product_fn
 {
-    template <class Outer, class Inner>
-    struct transform_inner
+    template <class T0, class T1, class Out = concat_result_t<T0, T1>>
+    auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1) const -> sequence<Out>
     {
-        Outer m_outer;
+        return seq0  //
+               |= transform_join(
+                   [seq1](auto&& s0)
+                   {
+                       return seq1  //
+                              |= transform([=](auto&& s1) { return concat(s0, s1); });
+                   });
+    }
 
-        template <class I>
-        auto operator()(I&& inner) const -> concat_result_t<Outer, Inner>
-        {
-            return concat(m_outer, std::forward<I>(inner));
-        }
-    };
-
-    template <class Outer, class Inner>
-    struct transform_outer
+    template <class T0, class T1, class T2, class Out = concat_result_t<T0, concat_result_t<T1, T2>>>
+    auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2) const -> sequence<Out>
     {
-        sequence<Inner> m_inner;
+        return seq0  //
+               |= transform_join(
+                   [=](auto&& s0)
+                   {
+                       return seq1  //
+                              |= transform_join(
+                                  [=](auto&& s1)
+                                  {
+                                      return seq2  //
+                                             |= seq::transform([=](auto&& s2) { return concat(s0, concat(s1, s2)); });
+                                  });
+                   });
+    }
 
-        template <class O>
-        auto operator()(O&& outer) const -> sequence<concat_result_t<Outer, Inner>>
-        {
-            return transform(transform_inner<Outer, Inner>{ std::forward<O>(outer) })(m_inner);
-        }
-    };
-
-    template <class Outer, class Inner, class Out = concat_result_t<Outer, Inner>>
-    auto operator()(const sequence<Outer>& outer, const sequence<Inner>& inner) const -> sequence<Out>
+    template <
+        class T0,
+        class T1,
+        class T2,
+        class T3,
+        class Out = concat_result_t<concat_result_t<T0, T1>, concat_result_t<T2, T3>>>
+    auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2, const sequence<T3>& seq3)
+        const -> sequence<Out>
     {
-        return transform_join(transform_outer<Outer, Inner>{ inner })(outer);
+        return seq0  //
+               |= transform_join(
+                   [=](auto&& s0)
+                   {
+                       return seq1  //
+                              |= transform_join(
+                                  [=](auto&& s1)
+                                  {
+                                      return seq2  //
+                                             |= seq::transform_join(
+                                                 [=](auto&& s2) {
+                                                     return seq3
+                                                            |= transform([=](auto&& s3)
+                                                                         { return concat(concat(s0, s1), concat(s2, s3)); });
+                                                 });
+                                  });
+                   });
     }
 };
 

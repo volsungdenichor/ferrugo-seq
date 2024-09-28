@@ -22,8 +22,9 @@ int main()
         |= take(5);
 
     const std::vector<int> numbers = range(0, 5);
+    const std::vector<double> v = { 1.5, 2.2 };
 
-    for (const auto item : cartesian_product(view(letters), view(numbers)))
+    for (const auto item : cartesian_product(range(2), view(letters), view(v), view(numbers)))
     {
         std::cout << item << "\n";
     }

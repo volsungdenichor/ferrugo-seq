@@ -50,14 +50,17 @@ struct is_tuple<tuple<Types...>> : std::true_type
 {
 };
 
+template <class...>
+struct concat_result;
+
 template <class L, class R>
-struct concat_result
+struct concat_result<L, R>
 {
     using type = tuple<L, R>;
 };
 
-template <class L, class R>
-using concat_result_t = typename concat_result<L, R>::type;
+template <class... Args>
+using concat_result_t = typename concat_result<Args...>::type;
 
 template <class... L, class... R>
 struct concat_result<tuple<L...>, tuple<R...>>
