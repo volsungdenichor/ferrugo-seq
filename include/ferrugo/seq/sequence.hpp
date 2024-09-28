@@ -146,7 +146,7 @@ public:
     {
     }
 
-    template <class Container, class = std::enable_if_t<std::is_constructible_v<Container, iterator, iterator>>>
+    template <class Container, std::enable_if_t<std::is_constructible_v<Container, iterator, iterator>, int> = 0>
     operator Container() const
     {
         return Container{ begin(), end() };

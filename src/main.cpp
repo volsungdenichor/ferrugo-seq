@@ -17,16 +17,14 @@ int main()
     using namespace ferrugo;
     using namespace ferrugo::seq;
 
-    const std::vector<std::string> pl = range(26)  //
-        |= drop_while(L(it < 13))                  //
-        |= transform(core::str);
+    const std::vector<std::string> letters = range('A', (char)('Z' + 1))  //
+        |= transform(core::str)                                           //
+        |= take(5);
 
-    const std::vector<std::string> en = { "Alice", "has", "cat", "and", "dog" };
+    const std::vector<int> numbers = range(0, 5);
 
-    const auto f = [](int x) -> sequence<int> { return range(x); };
-
-    range(5)             //
-        |= transform(f)  //
-        |= join          //
-        |= for_each(L(std::cout << it << "\n"));
+    for (const auto item : cartesian_product(view(letters), view(numbers)))
+    {
+        std::cout << item << "\n";
+    }
 }
