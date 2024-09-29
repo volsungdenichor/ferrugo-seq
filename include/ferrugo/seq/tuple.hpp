@@ -50,64 +50,37 @@ struct is_tuple<tuple<Types...>> : std::true_type
 {
 };
 
-template <class...>
-struct concat_result;
-
-template <class L, class R>
-struct concat_result<L, R>
+struct concat_fn
 {
-    using type = tuple<L, R>;
+    template <class... Types>
+    static constexpr auto from_std_tuple(std::tuple<Types...> arg) -> tuple<Types...>
+    {
+        return { std::move(arg) };
+    }
+
+    template <class... Types>
+    static constexpr auto to_std_tuple(tuple<Types...> arg) -> std::tuple<Types...>
+    {
+        return static_cast<std::tuple<Types...>>(arg);
+    }
+
+    template <class T>
+    static constexpr auto to_std_tuple(T&& arg) -> std::tuple<T>
+    {
+        return { std::forward<T>(arg) };
+    }
+
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const
+    {
+        return from_std_tuple(std::tuple_cat(to_std_tuple(std::forward<Args>(args))...));
+    }
 };
+
+static constexpr inline auto concat = concat_fn{};
 
 template <class... Args>
-using concat_result_t = typename concat_result<Args...>::type;
-
-template <class... L, class... R>
-struct concat_result<tuple<L...>, tuple<R...>>
-{
-    using type = tuple<L..., R...>;
-};
-
-template <class L, class... R>
-struct concat_result<L, tuple<R...>>
-{
-    using type = tuple<L, R...>;
-};
-
-template <class... L, class R>
-struct concat_result<tuple<L...>, R>
-{
-    using type = tuple<L..., R>;
-};
-
-template <class... L, class... R>
-constexpr auto concat(tuple<L...> lhs, tuple<R...> rhs) -> concat_result_t<tuple<L...>, tuple<R...>>
-{
-    using lhs_t = typename tuple<L...>::base_t;
-    using rhs_t = typename tuple<R...>::base_t;
-    return std::tuple_cat(std::move(static_cast<lhs_t&>(lhs)), std::move(static_cast<rhs_t&>(rhs)));
-}
-
-template <class L, class... R, std::enable_if_t<!is_tuple<std::decay_t<L>>::value, int> = 0>
-constexpr auto concat(L&& lhs, tuple<R...> rhs) -> concat_result_t<L, tuple<R...>>
-{
-    return concat(tuple<L>{ std::forward<L>(lhs) }, std::move(rhs));
-}
-
-template <class... L, class R, std::enable_if_t<!is_tuple<std::decay_t<R>>::value, int> = 0>
-constexpr auto concat(tuple<L...> lhs, R&& rhs) -> concat_result_t<tuple<L...>, R>
-{
-    return concat(std::move(lhs), tuple<R>{ std::forward<R>(rhs) });
-}
-
-template <
-    class L,
-    class R,
-    std::enable_if_t<!is_tuple<std::decay_t<L>>::value && !is_tuple<std::decay_t<R>>::value, int> = 0>
-constexpr auto concat(L&& lhs, R&& rhs) -> concat_result_t<L, R>
-{
-    return tuple<L, R>{ std::forward<L>(lhs), std::forward<R>(rhs) };
-}
+using concat_result_t = decltype(concat(std::declval<Args>()...));
 
 }  // namespace seq
 }  // namespace ferrugo

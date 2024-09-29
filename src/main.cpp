@@ -17,14 +17,9 @@ int main()
     using namespace ferrugo;
     using namespace ferrugo::seq;
 
-    const std::vector<std::string> letters = range('A', (char)('Z' + 1))  //
-        |= transform(core::str)                                           //
-        |= take(5);
+    const std::vector<std::string> values = range('A', 'E') |= transform(core::str);
 
-    const std::vector<int> numbers = range(0, 5);
-    const std::vector<double> v = { 1.5, 2.2 };
-
-    for (const auto item : cartesian_product(range(2), view(letters), view(v), view(numbers)))
+    for (const auto item : cartesian_product(range(2), view(values), range(3), range(4)))
     {
         std::cout << item << "\n";
     }
