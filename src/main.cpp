@@ -19,8 +19,8 @@ int main()
 
     const std::vector<std::string> values = range('A', 'E') |= transform(core::str);
 
-    for (const auto item : cartesian_product(range(2), view(values), range(3), range(4)))
+    for (const auto&& [a, b, c, d] : cartesian_product(range(2), view(values), range(3), range(4)))
     {
-        std::cout << item << "\n";
+        std::cout << a << " " << b << " " << c << " " << d << "\n";
     }
 }
