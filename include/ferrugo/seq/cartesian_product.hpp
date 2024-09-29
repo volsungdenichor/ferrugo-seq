@@ -19,8 +19,9 @@ struct cartesian_product_fn
                |= transform_join(
                    [seq1](auto&& s0) -> sequence<Out>
                    {
+                       auto head = tuple<T0>{ s0 };
                        return seq1  //
-                              |= transform([=](auto&& s1) -> Out { return concat(s0, s1); });
+                              |= transform([=](auto&& arg) -> Out { return concat(head, arg); });
                    });
     }
 
@@ -31,8 +32,9 @@ struct cartesian_product_fn
                |= transform_join(
                    [seq2](auto&& s0, auto&& s1) -> sequence<Out>
                    {
+                       auto head = tuple<T0, T1>{ s0, s1 };
                        return seq2  //
-                              |= transform([=](auto&& s2) -> Out { return concat(s0, s1, s2); });
+                              |= transform([=](auto&& arg) -> Out { return concat(head, arg); });
                    });
     }
 
@@ -44,8 +46,9 @@ struct cartesian_product_fn
                |= transform_join(
                    [seq3](auto&& s0, auto&& s1, auto&& s2) -> sequence<Out>
                    {
+                       auto head = tuple<T0, T1, T2>{ s0, s1, s2 };
                        return seq3  //
-                              |= transform([=](auto&& s3) -> Out { return concat(s0, s1, s2, s3); });
+                              |= transform([=](auto&& arg) -> Out { return concat(head, arg); });
                    });
     }
 };
