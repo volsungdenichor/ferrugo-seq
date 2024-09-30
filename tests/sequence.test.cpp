@@ -284,3 +284,11 @@ TEST_CASE("index_of", "[sequence][terminals]")
     const auto pred = [](int x) { return x > 5; };
     REQUIRE_THAT(seq::range(10) |= seq::index_of(pred), matchers::equal_to(6));
 }
+
+TEST_CASE("cartesian_product", "[sequence][terminals]")
+{
+    using t = seq::tuple<int, int>;
+    REQUIRE_THAT(
+        seq::cartesian_product(seq::range(3), seq::range(3, 5)),
+        matchers::elements_are(t{ 0, 3 }, t{ 0, 4 }, t{ 1, 3 }, t{ 1, 4 }, t{ 2, 3 }, t{ 2, 4 }));
+}
