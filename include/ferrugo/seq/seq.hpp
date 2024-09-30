@@ -4,6 +4,8 @@
 #include <ferrugo/seq/chain.hpp>
 #include <ferrugo/seq/drop_while.hpp>
 #include <ferrugo/seq/filter.hpp>
+#include <ferrugo/seq/from.hpp>
+#include <ferrugo/seq/getlines.hpp>
 #include <ferrugo/seq/initializers.hpp>
 #include <ferrugo/seq/join.hpp>
 #include <ferrugo/seq/owning.hpp>
