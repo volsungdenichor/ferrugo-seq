@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ferrugo/seq/cached.hpp>
 #include <ferrugo/seq/cartesian_product.hpp>
 #include <ferrugo/seq/chain.hpp>
 #include <ferrugo/seq/drop_while.hpp>
