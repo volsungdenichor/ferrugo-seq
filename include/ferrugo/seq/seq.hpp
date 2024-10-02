@@ -11,6 +11,7 @@
 #include <ferrugo/seq/join.hpp>
 #include <ferrugo/seq/owning.hpp>
 #include <ferrugo/seq/slice.hpp>
+#include <ferrugo/seq/sort.hpp>
 #include <ferrugo/seq/take_while.hpp>
 #include <ferrugo/seq/terminals.hpp>
 #include <ferrugo/seq/transform.hpp>

@@ -14,9 +14,9 @@ namespace detail
 struct cached_fn
 {
     template <class T>
-    auto operator()(const sequence<T>& seq) const
+    auto operator()(const sequence<T>& seq) const -> sequence<range_reference_t<std::vector<std::decay_t<T>>>>
     {
-        std::vector<T> buffer;
+        std::vector<std::decay_t<T>> buffer;
         for (auto it = std::begin(seq); it != std::end(seq); ++it)
         {
             buffer.push_back(*it);

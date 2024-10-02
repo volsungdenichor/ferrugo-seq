@@ -317,3 +317,10 @@ TEST_CASE("getlines", "[sequence][initializers]")
             matchers::elements_are("0. A cat", "2. is owned by", "3. Alice"));
     }
 }
+
+TEST_CASE("sort", "[sequence]")
+{
+    const std::vector<int> vect = { 9, 1, 2, 3, 3, 5, 2, 8 };
+    REQUIRE_THAT(seq::view(vect) |= seq::sort(), matchers::elements_are(1, 2, 2, 3, 3, 5, 8, 9));
+    REQUIRE_THAT(seq::view(vect) |= seq::sort(std::greater{}), matchers::elements_are(9, 8, 5, 3, 3, 2, 2, 1));
+}
