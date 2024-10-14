@@ -11,7 +11,7 @@ namespace seq
 namespace detail
 {
 
-struct do_not_deconstruct_fn
+struct do_not_destructure_fn
 {
     template <class Func>
     struct impl_t
@@ -34,15 +34,15 @@ struct do_not_deconstruct_fn
 
 }  // namespace detail
 
-static constexpr inline auto do_not_deconstruct = detail::do_not_deconstruct_fn{};
+static constexpr inline auto do_not_destructure = detail::do_not_destructure_fn{};
 
 template <class Func>
-struct should_deconstruct : std::true_type
+struct should_destructure : std::true_type
 {
 };
 
 template <class Func>
-struct should_deconstruct<detail::do_not_deconstruct_fn::impl_t<Func>> : std::false_type
+struct should_destructure<detail::do_not_destructure_fn::impl_t<Func>> : std::false_type
 {
 };
 
@@ -55,7 +55,7 @@ constexpr auto invoke(Func&& func, Head&& head, Tail&&... tail) -> std::invoke_r
 template <
     class Func,
     class Arg,
-    std::enable_if_t<should_deconstruct<std::decay_t<Func>>{} && is_tuple<std::decay_t<Arg>>{}, int> = 0>
+    std::enable_if_t<should_destructure<std::decay_t<Func>>{} && is_tuple<std::decay_t<Arg>>{}, int> = 0>
 constexpr auto invoke(Func&& func, Arg&& arg) -> decltype(std::apply(std::forward<Func>(func), std::forward<Arg>(arg)))
 {
     return std::apply(std::forward<Func>(func), std::forward<Arg>(arg));
@@ -64,7 +64,7 @@ constexpr auto invoke(Func&& func, Arg&& arg) -> decltype(std::apply(std::forwar
 template <
     class Func,
     class Arg,
-    std::enable_if_t<!should_deconstruct<std::decay_t<Func>>{} && is_tuple<std::decay_t<Arg>>{}, int> = 0>
+    std::enable_if_t<!should_destructure<std::decay_t<Func>>{} && is_tuple<std::decay_t<Arg>>{}, int> = 0>
 constexpr auto invoke(Func&& func, Arg&& arg) -> decltype(std::invoke(std::forward<Func>(func), std::forward<Arg>(arg)))
 {
     return std::invoke(std::forward<Func>(func), std::forward<Arg>(arg));

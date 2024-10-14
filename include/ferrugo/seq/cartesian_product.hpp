@@ -36,29 +36,29 @@ struct cartesian_product_fn
         sequence<T> m_seq;
 
         template <class Arg>
-        auto operator()(Arg&& arg) const
+        auto operator()(Arg&& arg) const -> sequence<Out>
         {
-            return m_seq |= transform(do_not_deconstruct(concatenate<Out>(Head{ std::forward<Arg>(arg) })));
+            return m_seq |= transform(do_not_destructure(concatenate<Out>(Head{ std::forward<Arg>(arg) })));
         }
     };
 
     template <class T0, class T1, class Out = concat_result_t<T0, T1>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1) const -> sequence<Out>
     {
-        return seq0 |= transform_join(do_not_deconstruct(impl<tuple<T0>, T1>{ seq1 }));
+        return seq0 |= transform_join(do_not_destructure(impl<tuple<T0>, T1>{ seq1 }));
     }
 
     template <class T0, class T1, class T2, class Out = concat_result_t<T0, T1, T2>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2) const -> sequence<Out>
     {
-        return (*this)(seq0, seq1) |= transform_join(do_not_deconstruct(impl<tuple<T0, T1>, T2>{ seq2 }));
+        return (*this)(seq0, seq1) |= transform_join(do_not_destructure(impl<tuple<T0, T1>, T2>{ seq2 }));
     }
 
     template <class T0, class T1, class T2, class T3, class Out = concat_result_t<T0, T1, T2, T3>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2, const sequence<T3>& seq3)
         const -> sequence<Out>
     {
-        return (*this)(seq0, seq1, seq2) |= transform_join(do_not_deconstruct(impl<tuple<T0, T1, T2>, T3>{ seq3 }));
+        return (*this)(seq0, seq1, seq2) |= transform_join(do_not_destructure(impl<tuple<T0, T1, T2>, T3>{ seq3 }));
     }
 };
 
