@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ferrugo/seq/invoke.hpp>
-#include <ferrugo/seq/join.hpp>
+#include <ferrugo/seq/transform_join.hpp>
 
 namespace ferrugo
 {
@@ -13,34 +12,6 @@ namespace detail
 
 struct cartesian_product_fn
 {
-    struct map_fn
-    {
-        template <class Func, class In, class Out>
-        struct next_function
-        {
-            Func m_func;
-            next_function_t<In> m_next;
-
-            auto operator()() const -> maybe<Out>
-            {
-                maybe<In> res = m_next();
-                if (!res)
-                {
-                    return {};
-                }
-                return std::invoke(m_func, *res);
-            }
-        };
-
-        template <class Func, class T, class Out = std::invoke_result_t<Func, T>>
-        auto operator()(Func&& func, const sequence<T>& s) const -> sequence<Out>
-        {
-            return sequence<Out>{ next_function<std::decay_t<Func>, T, Out>{ std::forward<Func>(func), s.get_next() } };
-        }
-    };
-
-    static constexpr auto map = map_fn{};
-
     template <class Out, class Head>
     struct concatenate_impl
     {
@@ -67,27 +38,27 @@ struct cartesian_product_fn
         template <class Arg>
         auto operator()(Arg&& arg) const
         {
-            return map(concatenate<Out>(Head{ std::forward<Arg>(arg) }), m_seq);
+            return m_seq |= transform(do_not_deconstruct(concatenate<Out>(Head{ std::forward<Arg>(arg) })));
         }
     };
 
     template <class T0, class T1, class Out = concat_result_t<T0, T1>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1) const -> sequence<Out>
     {
-        return join(map(impl<tuple<T0>, T1>{ seq1 }, seq0));
+        return seq0 |= transform_join(do_not_deconstruct(impl<tuple<T0>, T1>{ seq1 }));
     }
 
     template <class T0, class T1, class T2, class Out = concat_result_t<T0, T1, T2>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2) const -> sequence<Out>
     {
-        return join(map(impl<tuple<T0, T1>, T2>{ seq2 }, (*this)(seq0, seq1)));
+        return (*this)(seq0, seq1) |= transform_join(do_not_deconstruct(impl<tuple<T0, T1>, T2>{ seq2 }));
     }
 
     template <class T0, class T1, class T2, class T3, class Out = concat_result_t<T0, T1, T2, T3>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2, const sequence<T3>& seq3)
         const -> sequence<Out>
     {
-        return join(map(impl<tuple<T0, T1, T2>, T3>{ seq3 }, (*this)(seq0, seq1, seq2)));
+        return (*this)(seq0, seq1, seq2) |= transform_join(do_not_deconstruct(impl<tuple<T0, T1, T2>, T3>{ seq3 }));
     }
 };
 

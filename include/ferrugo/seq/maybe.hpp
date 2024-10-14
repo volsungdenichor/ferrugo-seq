@@ -13,6 +13,7 @@ struct none_t
     struct constructor_tag
     {
     };
+
     constexpr explicit none_t(constructor_tag)
     {
     }
