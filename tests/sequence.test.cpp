@@ -179,12 +179,12 @@ TEST_CASE("join", "[sequence]")
         matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
 }
 
-// TEST_CASE("transform_join", "[sequence]")
-// {
-//     REQUIRE_THAT(
-//         seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
-//         matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
-// }
+TEST_CASE("transform_join", "[sequence]")
+{
+    REQUIRE_THAT(
+        seq::range(5) |= seq::transform_join([](int x) { return seq::range(x); }),
+        matchers::elements_are(0, 0, 1, 0, 1, 2, 0, 1, 2, 3));
+}
 
 TEST_CASE("init", "[sequence][initializers]")
 {

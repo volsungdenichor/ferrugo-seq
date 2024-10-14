@@ -18,7 +18,7 @@ struct transform_join_fn
         Func m_func;
 
         template <class T>
-        auto operator()(const sequence<T>& s) const
+        auto operator()(const sequence<T>& s) const -> decltype(join(transform(m_func)(s)))
         {
             return join(transform(m_func)(s));
         }

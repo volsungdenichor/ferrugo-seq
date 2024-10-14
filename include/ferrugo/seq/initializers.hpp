@@ -158,8 +158,8 @@ struct unfold_fn
             {
                 return {};
             }
-            auto [value, state] = *std::move(res);
-            m_state = std::move(state);
+            auto&& [value, new_state] = *std::move(res);
+            m_state = std::move(new_state);
             return value;
         }
     };
