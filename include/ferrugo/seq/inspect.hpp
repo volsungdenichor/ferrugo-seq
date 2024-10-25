@@ -64,7 +64,7 @@ struct inspect_i_fn
             maybe<In> res = m_next();
             if (res)
             {
-                invoke(m_func, concat(m_index++, *res));
+                invoke(m_func, tuplify(m_index++, *res));
             }
             return res;
         }

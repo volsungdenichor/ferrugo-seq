@@ -67,7 +67,7 @@ struct transform_i_fn
             {
                 return {};
             }
-            return invoke(m_func, concat(m_index++, *res));
+            return invoke(m_func, tuplify(m_index++, *res));
         }
     };
 
@@ -76,7 +76,7 @@ struct transform_i_fn
     {
         Func m_func;
 
-        template <class T, class Out = invoke_result_t<Func, concat_result_t<std::ptrdiff_t, T>>>
+        template <class T, class Out = invoke_result_t<Func, tuplify_result_t<std::ptrdiff_t, T>>>
         auto operator()(const sequence<T>& s) const -> sequence<Out>
         {
             return sequence<Out>{ next_function<Func, T, Out>{ m_func, s.get_next() } };

@@ -137,7 +137,7 @@ struct for_each_i_fn
             std::ptrdiff_t index = 0;
             for (; it != end; ++it, ++index)
             {
-                invoke(m_func, concat(index, *it));
+                invoke(m_func, tuplify(index, *it));
             }
         }
     };

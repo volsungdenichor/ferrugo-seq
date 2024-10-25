@@ -78,7 +78,7 @@ struct filter_i_fn
                     break;
                 }
 
-                if (invoke(m_pred, concat(m_index++, *res)))
+                if (invoke(m_pred, tuplify(m_index++, *res)))
                 {
                     return res;
                 }

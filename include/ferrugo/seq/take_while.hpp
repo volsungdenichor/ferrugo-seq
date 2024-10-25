@@ -63,7 +63,7 @@ struct take_while_i_fn
         auto operator()() const -> maybe<In>
         {
             maybe<In> res = m_next();
-            if (!(res && invoke(m_pred, concat(m_index++, *res))))
+            if (!(res && invoke(m_pred, tuplify(m_index++, *res))))
             {
                 return {};
             }

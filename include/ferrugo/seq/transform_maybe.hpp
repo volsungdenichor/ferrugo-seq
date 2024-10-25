@@ -79,7 +79,7 @@ struct transform_maybe_i_fn
                     break;
                 }
 
-                maybe<Out> r = invoke(m_func, concat(m_index++, *std::move(res)));
+                maybe<Out> r = invoke(m_func, tuplify(m_index++, *std::move(res)));
                 if (r)
                 {
                     return r;
@@ -94,7 +94,7 @@ struct transform_maybe_i_fn
     {
         Func m_func;
 
-        template <class T, class Out = maybe_underlying_type_t<invoke_result_t<Func, concat_result_t<std::ptrdiff_t, T>>>>
+        template <class T, class Out = maybe_underlying_type_t<invoke_result_t<Func, tuplify_result_t<std::ptrdiff_t, T>>>>
         auto operator()(const sequence<T>& s) const -> sequence<Out>
         {
             return sequence<Out>{ next_function<Func, T, Out>{ m_func, s.get_next() } };

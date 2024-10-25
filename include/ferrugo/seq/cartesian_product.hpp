@@ -20,7 +20,7 @@ struct cartesian_product_fn
         template <class T>
         auto operator()(T&& item) const -> Out
         {
-            return concat(m_head, std::forward<T>(item));
+            return tuplify(m_head, std::forward<T>(item));
         }
     };
 
@@ -30,7 +30,7 @@ struct cartesian_product_fn
         return { std::forward<Head>(head) };
     }
 
-    template <class Head, class T, class Out = concat_result_t<Head, T>>
+    template <class Head, class T, class Out = tuplify_result_t<Head, T>>
     struct impl
     {
         sequence<T> m_seq;
@@ -42,19 +42,19 @@ struct cartesian_product_fn
         }
     };
 
-    template <class T0, class T1, class Out = concat_result_t<T0, T1>>
+    template <class T0, class T1, class Out = tuplify_result_t<T0, T1>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1) const -> sequence<Out>
     {
         return seq0 |= transform_join(do_not_destructure(impl<tuple<T0>, T1>{ seq1 }));
     }
 
-    template <class T0, class T1, class T2, class Out = concat_result_t<T0, T1, T2>>
+    template <class T0, class T1, class T2, class Out = tuplify_result_t<T0, T1, T2>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2) const -> sequence<Out>
     {
         return (*this)(seq0, seq1) |= transform_join(do_not_destructure(impl<tuple<T0, T1>, T2>{ seq2 }));
     }
 
-    template <class T0, class T1, class T2, class T3, class Out = concat_result_t<T0, T1, T2, T3>>
+    template <class T0, class T1, class T2, class T3, class Out = tuplify_result_t<T0, T1, T2, T3>>
     auto operator()(const sequence<T0>& seq0, const sequence<T1>& seq1, const sequence<T2>& seq2, const sequence<T3>& seq3)
         const -> sequence<Out>
     {

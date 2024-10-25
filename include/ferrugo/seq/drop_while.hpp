@@ -84,7 +84,7 @@ struct drop_while_i_fn
                     {
                         return {};
                     }
-                    if (!invoke(m_pred, concat(m_index++, *res)))
+                    if (!invoke(m_pred, tuplify(m_index++, *res)))
                     {
                         m_init = false;
                         return res;

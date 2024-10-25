@@ -50,7 +50,7 @@ struct is_tuple<tuple<Types...>> : std::true_type
 {
 };
 
-struct concat_fn
+struct tuplify_fn
 {
     template <class... Types>
     static constexpr auto from_std_tuple(std::tuple<Types...> arg) -> tuple<Types...>
@@ -77,10 +77,10 @@ struct concat_fn
     }
 };
 
-static constexpr inline auto concat = concat_fn{};
+static constexpr inline auto tuplify = tuplify_fn{};
 
 template <class... Args>
-using concat_result_t = decltype(concat(std::declval<Args>()...));
+using tuplify_result_t = decltype(tuplify(std::declval<Args>()...));
 
 }  // namespace seq
 }  // namespace ferrugo
