@@ -77,17 +77,89 @@ struct slice_fn
 
 struct drop_fn
 {
-    auto operator()(std::ptrdiff_t n) const
+    template <class In>
+    struct next_function
     {
-        return slice_fn{}({ n, {}, 1 });
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_count;
+        mutable bool m_init;
+
+        next_function(next_function_t<In> next, std::ptrdiff_t count)
+            : m_next{ std::move(next) }
+            , m_count{ count }
+            , m_init{ false }
+        {
+        }
+
+        auto operator()() const -> maybe<In>
+        {
+            if (!m_init)
+            {
+                while (m_count > 0)
+                {
+                    --m_count;
+                    m_next();
+                }
+                m_init = true;
+            }
+            return m_next();
+        }
+    };
+
+    struct impl_t
+    {
+        std::ptrdiff_t m_count;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> sequence<T>
+        {
+            return sequence<T>{ next_function<T>{ s.get_next(), m_count } };
+        }
+    };
+
+    auto operator()(std::ptrdiff_t count) const -> pipe_t<impl_t>
+    {
+        return { impl_t{ count } };
     }
 };
 
 struct take_fn
 {
-    auto operator()(std::ptrdiff_t n) const
+    template <class In>
+    struct next_function
     {
-        return slice_fn{}({ 0, n, 1 });
+        next_function_t<In> m_next;
+        mutable std::ptrdiff_t m_count;
+
+        next_function(next_function_t<In> next, std::ptrdiff_t count) : m_next(std::move(next)), m_count{ count }
+        {
+        }
+
+        auto operator()() const -> maybe<In>
+        {
+            if (m_count == 0)
+            {
+                return {};
+            }
+            --m_count;
+            return m_next();
+        }
+    };
+
+    struct impl_t
+    {
+        std::ptrdiff_t m_count;
+
+        template <class T>
+        auto operator()(const sequence<T>& s) const -> sequence<T>
+        {
+            return sequence<T>{ next_function<T>{ s.get_next(), m_count } };
+        }
+    };
+
+    auto operator()(std::ptrdiff_t count) const -> pipe_t<impl_t>
+    {
+        return { impl_t{ count } };
     }
 };
 
