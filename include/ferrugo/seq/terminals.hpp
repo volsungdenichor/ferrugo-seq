@@ -165,7 +165,7 @@ struct fold_fn
             const auto e = std::end(s);
             for (; b != e; ++b)
             {
-                result = m_func(result, *b);
+                result = invoke(m_func, tuplify(std::move(result), *b));
             }
             return result;
         }

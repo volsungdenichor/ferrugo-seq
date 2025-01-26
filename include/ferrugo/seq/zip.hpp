@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ferrugo/seq/sequence.hpp>
+#include <ferrugo/seq/tuple.hpp>
 
 namespace ferrugo
 {

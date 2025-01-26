@@ -61,7 +61,7 @@ struct tuplify_fn
     template <class... Types>
     static constexpr auto to_std_tuple(tuple<Types...> arg) -> std::tuple<Types...>
     {
-        return static_cast<std::tuple<Types...>>(arg);
+        return arg;
     }
 
     template <class T>

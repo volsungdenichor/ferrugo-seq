@@ -11,7 +11,22 @@ int main()
     using namespace ferrugo;
     using namespace ferrugo::seq;
 
-    seq::cartesian_product(seq::range(1, 20), seq::range(1, 20), seq::range(1, 100))
-        |= seq::filter([](int a, int b, int c) { return a * a + b * b == c * c; })
-        |= seq::for_each([](int a, int b, int c) { std::cout << a << " " << b << " " << c << "\n"; });
+    const std::string text = "Ren";
+
+    const auto res = seq::zip(  //
+        seq::view(text),
+        seq::view(text) |= seq::drop(1))
+        |= seq::fold(
+            0,
+            [](int total, char x, char y) -> int
+            {
+                std::cerr << x << " " << y << "\n";
+                if (x != y)
+                {
+                    return total + 1;
+                }
+                return total;
+            });
+
+    std::cout << res << "\n";
 }

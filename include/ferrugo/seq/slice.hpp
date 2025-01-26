@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ferrugo/seq/invoke.hpp>
+#include <ferrugo/seq/pipe.hpp>
 #include <ferrugo/seq/sequence.hpp>
 
 namespace ferrugo
